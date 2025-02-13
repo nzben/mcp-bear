@@ -44,7 +44,6 @@ async def test_list_tools(mcp_client_session: ClientSession) -> None:
     assert "grab_url" in tools
 
 
-
 @pytest.mark.anyio
 async def test_list_resources(mcp_client_session: ClientSession) -> None:
     res = await mcp_client_session.list_resources()

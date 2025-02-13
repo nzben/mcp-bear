@@ -34,12 +34,12 @@ class ErrorResponse(Exception):
     errorCode: int
     errorMessage: str
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.errorMessage
 
 
 def register_callback(api: FastAPI, path: str) -> Queue[Future[QueryParams]]:
-    queue = Queue()
+    queue = Queue[Future[QueryParams]]()
 
     @api.get(
         f"/{path}/success", status_code=HTTPStatus.NO_CONTENT, include_in_schema=False
@@ -106,7 +106,7 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if title is not None:
             params["title"] = title
 
-        future = Future()
+        future = Future[QueryParams]()
         await open_note_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/open-note?{urlencode(params, quote_via=quote)}")
@@ -148,7 +148,7 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if timestamp:
             params["timestamp"] = "yes"
 
-        future = Future()
+        future = Future[QueryParams]()
         await create_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/create?{urlencode(params, quote_via=quote)}")
@@ -172,14 +172,14 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
             "x-error": f"http://{callback_host}:{callback_port}/tags/error",
         }
 
-        future = Future()
+        future = Future[QueryParams]()
         await tags_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/tags?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        notes = cast(list[dict], json.loads(res.get("tags")))
-        return [note.get("name") for note in notes]
+        notes = cast(list[dict], json.loads(res.get("tags") or "[]"))
+        return [note["name"] for note in notes if "name" in note]
 
     #
     # /open-tag API
@@ -200,13 +200,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
             "x-error": f"http://{callback_host}:{callback_port}/open-tag/error",
         }
 
-        future = Future()
+        future = Future[QueryParams]()
         await open_tag_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/open-tag?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        notes = cast(list[dict], json.loads(res.get("notes")))
+        notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
         return [f"{note.get('title')} (ID: {note.get('identifier')})" for note in notes]
 
     #
@@ -230,13 +230,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if search is not None:
             params["search"] = search
 
-        future = Future()
+        future = Future[QueryParams]()
         await todo_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/todo?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        notes = cast(list[dict], json.loads(res.get("notes")))
+        notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
         return [f"{note.get('title')} (ID: {note.get('identifier')})" for note in notes]
 
     #
@@ -260,13 +260,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if search is not None:
             params["search"] = search
 
-        future = Future()
+        future = Future[QueryParams]()
         await today_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/today?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        notes = cast(list[dict], json.loads(res.get("notes")))
+        notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
         return [f"{note.get('title')} (ID: {note.get('identifier')})" for note in notes]
 
     #
@@ -293,13 +293,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if tag is not None:
             params["tag"] = tag
 
-        future = Future()
+        future = Future[QueryParams]()
         await search_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/search?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        notes = cast(list[dict], json.loads(res.get("notes")))
+        notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
         return [f"{note.get('title')} (ID: {note.get('identifier')})" for note in notes]
 
     #
@@ -326,13 +326,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         if tags is not None:
             params["tags"] = ",".join(tags)
 
-        future = Future()
+        future = Future[QueryParams]()
         await grab_url_results.put(future)
 
         webbrowser.open(f"{BASE_URL}/grab-url?{urlencode(params, quote_via=quote)}")
         res = await future
 
-        return res.get("identifier")
+        return res.get("identifier") or ""
 
     #
     # start servers
@@ -346,7 +346,7 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
         )
     )
 
-    async def run_mcp_server():
+    async def run_mcp_server() -> None:
         logger.info("Starting MCP server")
         try:
             await mcp.run_stdio_async()
@@ -354,12 +354,12 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
             callback_server.should_exit = True
         logger.info("MCP server stopped")
 
-    async def run_callback_server():
+    async def run_callback_server() -> None:
         logger.info("Starting callback server")
         await callback_server.serve()
         logger.info("Callback server stopped")
 
-    async def run_servers():
+    async def run_servers() -> None:
         await asyncio.gather(run_mcp_server(), run_callback_server())
 
     asyncio.run(run_servers())
@@ -380,8 +380,7 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
     show_default=True,
 )
 def main(token: str, callback_host: str, callback_port: int) -> None:
-    """A MCP server for interacting with Bear note-taking software.
-    """
+    """A MCP server for interacting with Bear note-taking software."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(levelname)s: %(message)s",
