@@ -2,9 +2,18 @@
 > This application is currently under development. A known issue exists where **a browser opens for every API call**.
 
 # Bear MCP Server
+[![smithery badge](https://smithery.ai/badge/@jkawamoto/mcp-bear)](https://smithery.ai/server/@jkawamoto/mcp-bear)
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
 
 ## Installation
+
+### Installing via Smithery
+
+To install Bear MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@jkawamoto/mcp-bear):
+
+```bash
+npx -y @smithery/cli install @jkawamoto/mcp-bear --client claude
+```
 
 ### For Goose CLI
 To enable the Bear extension in Goose CLI,
