@@ -4,6 +4,8 @@
 # Bear MCP Server
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
 
+<a href="https://glama.ai/mcp/servers/2gg54jdwwv"><img width="380" height="200" src="https://glama.ai/mcp/servers/2gg54jdwwv/badge" alt="Bear Server MCP server" /></a>
+
 ## Installation
 
 ### For Goose CLI
