@@ -1,0 +1,29 @@
+[project]
+name = "mcp-bear"
+version = "0.1.0"
+description = "A MCP server for interacting with Bear note-taking software."
+readme = "README.md"
+authors = [
+    { name = "Junpei Kawamoto", email = "kawamoto.junpei@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.8",
+    "fastapi>=0.115.8",
+    "mcp>=1.2.1",
+    "pydantic>=2.10.6",
+    "uvicorn>=0.34.0",
+]
+
+[project.scripts]
+mcp-bear = "mcp_bear:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
+
