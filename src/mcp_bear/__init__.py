@@ -9,6 +9,7 @@
 import asyncio
 import json
 import logging
+import signal
 import sys
 import webbrowser
 from asyncio import Queue, Future, QueueEmpty
@@ -71,9 +72,7 @@ def register_callback(api: FastAPI, path: str) -> Queue[Future[QueryParams]]:
     return queue
 
 
-def run(token: str, callback_host: str, callback_port: int) -> None:
-    logger = logging.getLogger(__name__)
-
+async def run_servers(token: str, callback_host: str, callback_port: int) -> None:
     mcp = FastMCP("Bear")
     callback = FastAPI()
 
@@ -339,6 +338,7 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
     #
     log_config = deepcopy(LOGGING_CONFIG)
     log_config["handlers"]["access"]["stream"] = "ext://sys.stderr"
+    logger = logging.getLogger(__name__)
 
     callback_server = Server(
         Config(
@@ -356,13 +356,13 @@ def run(token: str, callback_host: str, callback_port: int) -> None:
 
     async def run_callback_server() -> None:
         logger.info("Starting callback server")
-        await callback_server.serve()
+        try:
+            await callback_server.serve()
+        except SystemExit:
+            signal.raise_signal(signal.SIGTERM)
         logger.info("Callback server stopped")
 
-    async def run_servers() -> None:
-        await asyncio.gather(run_mcp_server(), run_callback_server())
-
-    asyncio.run(run_servers())
+    await asyncio.gather(run_mcp_server(), run_callback_server())
 
 
 @click.command()
@@ -389,7 +389,7 @@ def main(token: str, callback_host: str, callback_port: int) -> None:
         ],
     )
 
-    run(token, callback_host, callback_port)
+    asyncio.run(run_servers(token, callback_host, callback_port))
 
 
 __all__: Final = ["main"]
