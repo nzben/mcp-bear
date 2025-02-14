@@ -2,6 +2,9 @@
 > This application is currently under development. A known issue exists where **a browser opens for every API call**.
 
 # Bear MCP Server
+[![Python Application](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml/badge.svg)](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml)
+[![GitHub License](https://img.shields.io/github/license/jkawamoto/mcp-bear)](https://github.com/jkawamoto/mcp-bear/blob/main/LICENSE)
+
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
 
 <a href="https://glama.ai/mcp/servers/2gg54jdwwv"><img width="380" height="200" src="https://glama.ai/mcp/servers/2gg54jdwwv/badge" alt="Bear Server MCP server" /></a>
