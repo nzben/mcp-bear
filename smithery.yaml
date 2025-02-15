@@ -1,5 +1,4 @@
 # Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
-
 startCommand:
   type: stdio
   configSchema:
@@ -11,7 +10,6 @@ startCommand:
       bearApiToken:
         type: string
         description: The API token for accessing the Bear note-taking software.
-  commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
-    |-
+  commandFunction: |-
     config => ({command: 'python', args: ['-m', 'mcp_bear'], env: {BEAR_API_TOKEN: config.bearApiToken}})
+  # A function that produces the CLI command to start the MCP on stdio.
