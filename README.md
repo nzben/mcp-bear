@@ -4,12 +4,22 @@
 # Bear MCP Server
 [![Python Application](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml/badge.svg)](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml)
 [![GitHub License](https://img.shields.io/github/license/jkawamoto/mcp-bear)](https://github.com/jkawamoto/mcp-bear/blob/main/LICENSE)
+[![smithery badge](https://smithery.ai/badge/@jkawamoto/mcp-bear)](https://smithery.ai/server/@jkawamoto/mcp-bear)
+
 
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
 
 <a href="https://glama.ai/mcp/servers/2gg54jdwwv"><img width="380" height="200" src="https://glama.ai/mcp/servers/2gg54jdwwv/badge" alt="Bear Server MCP server" /></a>
 
 ## Installation
+
+### Installing via Smithery
+
+To install Bear MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@jkawamoto/mcp-bear):
+
+```bash
+npx -y @smithery/cli install @jkawamoto/mcp-bear --client claude
+```
 
 ### For Goose CLI
 To enable the Bear extension in Goose CLI,
