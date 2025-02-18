@@ -342,12 +342,16 @@ async def run_servers(token: str, callback_host: str, callback_port: int) -> Non
 
     callback_server = Server(
         Config(
-            app=callback, host=callback_host, port=callback_port, log_config=log_config
+            app=callback,
+            host=callback_host,
+            port=callback_port,
+            log_level="warning",
+            log_config=log_config,
         )
     )
 
     async def run_mcp_server() -> None:
-        logger.info("Starting MCP server")
+        logger.info("Starting MCP server (Press CTRL+D to quit)")
         try:
             await mcp.run_stdio_async()
         finally:
@@ -355,7 +359,7 @@ async def run_servers(token: str, callback_host: str, callback_port: int) -> Non
         logger.info("MCP server stopped")
 
     async def run_callback_server() -> None:
-        logger.info("Starting callback server")
+        logger.info(f"Starting callback server on {callback_host}:{callback_port}")
         try:
             await callback_server.serve()
         except SystemExit:
@@ -369,7 +373,7 @@ async def run_servers(token: str, callback_host: str, callback_port: int) -> Non
 @click.option("--token", envvar="BEAR_API_TOKEN", required=True, help="Bear API token")
 @click.option(
     "--callback-host",
-    default="localhost",
+    default="127.0.0.1",
     help="hostname or IP address of the callback server",
     show_default=True,
 )

@@ -6,20 +6,35 @@
 [![GitHub License](https://img.shields.io/github/license/jkawamoto/mcp-bear)](https://github.com/jkawamoto/mcp-bear/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@jkawamoto/mcp-bear)](https://smithery.ai/server/@jkawamoto/mcp-bear)
 
-
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
 
 <a href="https://glama.ai/mcp/servers/2gg54jdwwv"><img width="380" height="200" src="https://glama.ai/mcp/servers/2gg54jdwwv/badge" alt="Bear Server MCP server" /></a>
 
 ## Installation
 
-### Installing via Smithery
+### For Claude Desktop
+To configure this server for Claude Desktop, edit the `claude_desktop_config.json` file with the following entry under
+`mcpServers`:
 
-To install Bear MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@jkawamoto/mcp-bear):
-
-```bash
-npx -y @smithery/cli install @jkawamoto/mcp-bear --client claude
+```json
+{
+  "mcpServers": {
+    "youtube-transcript": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/jkawamoto/mcp-bear",
+        "mcp-bear",
+        "--token",
+        "<YOUR_TOKEN>"
+      ]
+    }
+  }
+}
 ```
+After editing, restart the application.
+For more information,
+see: [For Claude Desktop Users - Model Context Protocol](https://modelcontextprotocol.io/quickstart/user).
 
 ### For Goose CLI
 To enable the Bear extension in Goose CLI,
@@ -50,6 +65,12 @@ For more details on configuring MCP servers in Goose Desktop,
 refer to the documentation:
 [Using Extensions - MCP Servers](https://block.github.io/goose/docs/getting-started/using-extensions#mcp-servers).
 
+### Installing via Smithery
+To install Bear MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@jkawamoto/mcp-bear):
+
+```bash
+npx -y @smithery/cli install @jkawamoto/mcp-bear --client claude
+```
 
 ## Actions Implemented
 
