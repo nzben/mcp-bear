@@ -11,9 +11,7 @@ from typing import AsyncGenerator
 import pytest
 from mcp import StdioServerParameters, ClientSession, stdio_client
 
-params = StdioServerParameters(
-    command="uv", args=["run", "mcp-bear", "--token", "abcdefg"]
-)
+params = StdioServerParameters(command="uv", args=["run", "mcp-bear", "--token", "abcdefg"])
 
 
 @pytest.fixture(scope="module")

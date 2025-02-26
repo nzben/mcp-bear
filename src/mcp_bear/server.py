@@ -40,9 +40,7 @@ class ErrorResponse(Exception):
 def register_callback(api: FastAPI, path: str) -> Queue[Future[QueryParams]]:
     queue = Queue[Future[QueryParams]]()
 
-    @api.get(
-        f"/{path}/success", status_code=HTTPStatus.NO_CONTENT, include_in_schema=False
-    )
+    @api.get(f"/{path}/success", status_code=HTTPStatus.NO_CONTENT, include_in_schema=False)
     def success(request: Request) -> None:
         try:
             future = queue.get_nowait()
@@ -50,9 +48,7 @@ def register_callback(api: FastAPI, path: str) -> Queue[Future[QueryParams]]:
         except QueueEmpty:
             pass
 
-    @api.get(
-        f"/{path}/error", status_code=HTTPStatus.NO_CONTENT, include_in_schema=False
-    )
+    @api.get(f"/{path}/error", status_code=HTTPStatus.NO_CONTENT, include_in_schema=False)
     def error(request: Request) -> None:
         try:
             future = queue.get_nowait()
@@ -159,9 +155,7 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
         title: str | None = Field(description="note title", default=None),
         text: str | None = Field(description="note body", default=None),
         tags: list[str] | None = Field(description="list of tags", default=None),
-        timestamp: bool = Field(
-            description="prepend the current date and time to the text", default=False
-        ),
+        timestamp: bool = Field(description="prepend the current date and time to the text", default=False),
     ) -> str:
         """Create a new note and return its unique identifier. Empty notes are not allowed."""
         app_ctx: AppContext = ctx.request_context.lifespan_context
