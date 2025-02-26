@@ -4,6 +4,8 @@
 # Bear MCP Server
 [![Python Application](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml/badge.svg)](https://github.com/jkawamoto/mcp-bear/actions/workflows/python-app.yaml)
 [![GitHub License](https://img.shields.io/github/license/jkawamoto/mcp-bear)](https://github.com/jkawamoto/mcp-bear/blob/main/LICENSE)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![smithery badge](https://smithery.ai/badge/@jkawamoto/mcp-bear)](https://smithery.ai/server/@jkawamoto/mcp-bear)
 
 A MCP server for interacting with [Bear](https://bear.app/) note-taking software.
