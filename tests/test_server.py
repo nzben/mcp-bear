@@ -10,7 +10,6 @@ from typing import AsyncGenerator
 
 import pytest
 from mcp import StdioServerParameters, ClientSession, stdio_client
-from pydantic import AnyUrl
 
 params = StdioServerParameters(
     command="uv", args=["run", "mcp-bear", "--token", "abcdefg"]
@@ -37,16 +36,9 @@ async def test_list_tools(mcp_client_session: ClientSession) -> None:
 
     assert "open_note" in tools
     assert "create" in tools
+    assert "tags" in tools
     assert "open_tag" in tools
     assert "todo" in tools
     assert "today" in tools
     assert "search" in tools
     assert "grab_url" in tools
-
-
-@pytest.mark.anyio
-async def test_list_resources(mcp_client_session: ClientSession) -> None:
-    res = await mcp_client_session.list_resources()
-    uris = set(r.uri for r in res.resources)
-
-    assert AnyUrl("bear://tags") in uris
