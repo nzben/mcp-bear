@@ -28,6 +28,7 @@ from mcp_bear.server import create_server
     help="port number on which the callback server is listening",
     show_default=True,
 )
+@click.version_option()
 def main(token: str, callback_host: str, callback_port: int) -> None:
     """A MCP server for interacting with Bear note-taking software."""
     logging.basicConfig(
