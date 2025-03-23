@@ -6,12 +6,21 @@
 #
 #  http://opensource.org/licenses/mit-license.php
 import logging
+import socket
 import sys
 from typing import Final
 
 import click
 
 from mcp_bear.server import create_server
+
+
+def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    """Check if a port is currently in use on the given host."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1)
+        result = sock.connect_ex((host, port))
+        return result == 0
 
 
 @click.command()
@@ -39,6 +48,16 @@ def main(token: str, callback_host: str, callback_port: int) -> None:
         ],
     )
     logger = logging.getLogger(__name__)
+
+    for port in range(callback_port, callback_port + 10):
+        if is_port_in_use(port, callback_host):
+            logger.info(f"Port {port} is already in use. Trying another port.")
+        else:
+            callback_port = port
+            break
+    else:
+        logger.error("No available port found. Please try again.")
+        sys.exit(1)
 
     mcp = create_server(token, callback_host, callback_port)
 
