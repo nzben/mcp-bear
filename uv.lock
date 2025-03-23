@@ -243,10 +243,10 @@ name = "mcp-bear"
 version = "0.1.1"
 source = { editable = "." }
 dependencies = [
-    { name = "click" },
     { name = "fastapi" },
     { name = "mcp" },
     { name = "pydantic" },
+    { name = "rich-click" },
     { name = "uvicorn" },
 ]
 
@@ -260,10 +260,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.1.8" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "mcp", specifier = ">=1.5" },
     { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "rich-click", specifier = ">=1.8.6" },
     { name = "uvicorn", specifier = ">=0.34" },
 ]
 
