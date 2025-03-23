@@ -20,6 +20,7 @@ from urllib.parse import urlencode, quote, unquote_plus
 from fastapi import FastAPI, Request
 from mcp.server import FastMCP
 from mcp.server.fastmcp import Context
+from mcp.server.session import ServerSessionT
 from pydantic import Field
 from starlette.datastructures import QueryParams
 from uvicorn import Config, Server
@@ -119,12 +120,12 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def open_note(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         id: str | None = Field(description="note unique identifier", default=None),
         title: str | None = Field(description="note title", default=None),
     ) -> str:
         """Open a note identified by its title or id and return its content."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.open_note_results.put(future)
 
@@ -151,14 +152,14 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def create(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         title: str | None = Field(description="note title", default=None),
         text: str | None = Field(description="note body", default=None),
         tags: list[str] | None = Field(description="list of tags", default=None),
         timestamp: bool = Field(description="prepend the current date and time to the text", default=False),
     ) -> str:
         """Create a new note and return its unique identifier. Empty notes are not allowed."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.create_results.put(future)
 
@@ -186,10 +187,10 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def tags(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
     ) -> list[str]:
         """Return all the tags currently displayed in Bear’s sidebar."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.tags_results.put(future)
 
@@ -207,11 +208,11 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def open_tag(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         name: str = Field(description="tag name or a list of tags divided by comma"),
     ) -> list[str]:
         """Show all the notes which have a selected tag in bear."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.open_tag_results.put(future)
 
@@ -230,11 +231,11 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def todo(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         search: str | None = Field(description="string to search", default=None),
     ) -> list[str]:
         """Select the Todo sidebar item."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.todo_results.put(future)
 
@@ -255,11 +256,11 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def today(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         search: str | None = Field(description="string to search", default=None),
     ) -> list[str]:
         """Select the Today sidebar item."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.today_results.put(future)
 
@@ -280,12 +281,12 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def search(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         term: str | None = Field(description="string to search", default=None),
         tag: str | None = Field(description="tag to search into", default=None),
     ) -> list[str]:
         """Show search results in Bear for all notes or for a specific tag."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.search_results.put(future)
 
@@ -308,7 +309,7 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
 
     @mcp.tool()
     async def grab_url(
-        ctx: Context,
+        ctx: Context[ServerSessionT, AppContext],
         url: str = Field(description="url to grab"),
         tags: list[str] | None = Field(
             description="list of tags. If tags are specified in the Bear’s web content preferences, this parameter is ignored.",
@@ -316,7 +317,7 @@ def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP
         ),
     ) -> str:
         """Create a new note with the content of a web page and return its unique identifier."""
-        app_ctx: AppContext = ctx.request_context.lifespan_context
+        app_ctx = ctx.request_context.lifespan_context
         future = Future[QueryParams]()
         await app_ctx.grab_url_results.put(future)
 

@@ -10,7 +10,7 @@ import socket
 import sys
 from typing import Final
 
-import click
+import rich_click as click
 
 from mcp_bear.server import create_server
 
