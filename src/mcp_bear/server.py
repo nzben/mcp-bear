@@ -13,6 +13,7 @@ from asyncio import Queue, Future, QueueEmpty
 from contextlib import asynccontextmanager
 from copy import deepcopy
 from dataclasses import dataclass
+from functools import partial
 from http import HTTPStatus
 from typing import cast, AsyncIterator
 from urllib.parse import urlencode, quote, unquote_plus
@@ -26,6 +27,8 @@ from uvicorn import Config, Server
 from uvicorn.config import LOGGING_CONFIG
 
 BASE_URL = "bear://x-callback-url"
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -78,44 +81,43 @@ class AppContext:
     grab_url_results: Queue[Future[QueryParams]]
 
 
-def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP:
-    logger = logging.getLogger(__name__)
+@asynccontextmanager
+async def app_lifespan(_server: FastMCP, callback_host: str, callback_port: int) -> AsyncIterator[AppContext]:
+    callback = FastAPI()
 
-    @asynccontextmanager
-    async def app_lifespan(_server: FastMCP) -> AsyncIterator[AppContext]:
-        callback = FastAPI()
-
-        log_config = deepcopy(LOGGING_CONFIG)
-        log_config["handlers"]["access"]["stream"] = "ext://sys.stderr"
-        server = Server(
-            Config(
-                app=callback,
-                host=callback_host,
-                port=callback_port,
-                log_level="warning",
-                log_config=log_config,
-            )
+    log_config = deepcopy(LOGGING_CONFIG)
+    log_config["handlers"]["access"]["stream"] = "ext://sys.stderr"
+    server = Server(
+        Config(
+            app=callback,
+            host=callback_host,
+            port=callback_port,
+            log_level="warning",
+            log_config=log_config,
         )
+    )
 
-        logger.info(f"Starting callback server on {callback_host}:{callback_port}")
-        server_task = asyncio.create_task(server.serve())
-        try:
-            yield AppContext(
-                open_note_results=register_callback(callback, "open-note"),
-                create_results=register_callback(callback, "create"),
-                tags_results=register_callback(callback, "tags"),
-                open_tag_results=register_callback(callback, "open-tag"),
-                todo_results=register_callback(callback, "todo"),
-                today_results=register_callback(callback, "today"),
-                search_results=register_callback(callback, "search"),
-                grab_url_results=register_callback(callback, "grab-url"),
-            )
-        finally:
-            logger.info("Stopping callback server")
-            server.should_exit = True
-            await server_task
+    LOGGER.info(f"Starting callback server on {callback_host}:{callback_port}")
+    server_task = asyncio.create_task(server.serve())
+    try:
+        yield AppContext(
+            open_note_results=register_callback(callback, "open-note"),
+            create_results=register_callback(callback, "create"),
+            tags_results=register_callback(callback, "tags"),
+            open_tag_results=register_callback(callback, "open-tag"),
+            todo_results=register_callback(callback, "todo"),
+            today_results=register_callback(callback, "today"),
+            search_results=register_callback(callback, "search"),
+            grab_url_results=register_callback(callback, "grab-url"),
+        )
+    finally:
+        LOGGER.info("Stopping callback server")
+        server.should_exit = True
+        await server_task
 
-    mcp = FastMCP("Bear", lifespan=app_lifespan)
+
+def create_server(token: str, callback_host: str, callback_port: int) -> FastMCP:
+    mcp = FastMCP("Bear", lifespan=partial(app_lifespan, callback_host=callback_host, callback_port=callback_port))
 
     @mcp.tool()
     async def open_note(
