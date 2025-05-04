@@ -5,7 +5,6 @@
 #  This software is released under the MIT License.
 #
 #  http://opensource.org/licenses/mit-license.php
-
-from mcp_bear import main
+from mcp_bear.cli import main
 
 main()
