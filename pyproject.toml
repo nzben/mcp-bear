@@ -31,7 +31,7 @@ dependencies = [
     "uvicorn>=0.34",
 ]
 
-scripts.mcp-bear = "mcp_bear:main"
+scripts.mcp-bear = "mcp_bear.cli:main"
 
 [dependency-groups]
 dev = [
