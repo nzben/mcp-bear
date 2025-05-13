@@ -9,7 +9,7 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
+import urllib.request
 from asyncio import Queue, Future, QueueEmpty
 from contextlib import asynccontextmanager
 from copy import deepcopy
@@ -121,12 +121,10 @@ async def app_lifespan(_server: FastMCP, callback_host: str, callback_port: int)
 
 def _open_url_silently(url: str) -> None:
     """Open a URL silently without showing window or console output."""
-    with open(os.devnull, 'w') as null_file:
-        subprocess.Popen(
-            ["open", "-g", url],
-            stdout=null_file,
-            stderr=null_file
-        )
+    try:
+        urllib.request.urlopen(url)
+    except Exception:
+        LOGGER.debug(f"Failed to open URL: {url}")
 
 
 def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
