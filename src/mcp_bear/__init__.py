@@ -8,7 +8,7 @@
 import asyncio
 import json
 import logging
-import webbrowser
+import requests
 from asyncio import Queue, Future, QueueEmpty
 from contextlib import asynccontextmanager
 from copy import deepcopy
@@ -121,7 +121,7 @@ async def app_lifespan(_server: FastMCP, callback_host: str, callback_port: int)
 def _open_url_silently(url: str) -> None:
     """Open a URL silently without showing window or console output."""
     try:
-        webbrowser.open(url, new=0, autoraise=False)
+        requests.get(url)
     except Exception:
         LOGGER.debug(f"Failed to open URL: {url}")
 
