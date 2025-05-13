@@ -8,6 +8,7 @@
 import asyncio
 import json
 import logging
+import os
 import subprocess
 from asyncio import Queue, Future, QueueEmpty
 from contextlib import asynccontextmanager
@@ -118,6 +119,16 @@ async def app_lifespan(_server: FastMCP, callback_host: str, callback_port: int)
         await server_task
 
 
+def _open_url_silently(url: str) -> None:
+    """Open a URL silently without showing window or console output."""
+    with open(os.devnull, 'w') as null_file:
+        subprocess.Popen(
+            ["open", "-g", url],
+            stdout=null_file,
+            stderr=null_file
+        )
+
+
 def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
     mcp = FastMCP("Bear", lifespan=partial(app_lifespan, callback_host=callback_host, callback_port=callback_port))
 
@@ -149,7 +160,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["title"] = title
 
         url = f"{BASE_URL}/open-note?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         return unquote_plus(res.get("note") or "")
@@ -185,7 +196,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["timestamp"] = "yes"
 
         url = f"{BASE_URL}/create?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         return res.get("identifier") or ""
@@ -206,7 +217,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         }
 
         url = f"{BASE_URL}/tags?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("tags") or "[]"))
@@ -230,7 +241,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         }
 
         url = f"{BASE_URL}/open-tag?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -256,7 +267,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["search"] = search
 
         url = f"{BASE_URL}/todo?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -282,7 +293,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["search"] = search
 
         url = f"{BASE_URL}/today?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -311,7 +322,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["tag"] = tag
 
         url = f"{BASE_URL}/search?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -340,7 +351,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["tags"] = ",".join(tags)
 
         url = f"{BASE_URL}/grab-url?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         return res.get("identifier") or ""
@@ -384,7 +395,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             params["timestamp"] = "yes"
 
         url = f"{BASE_URL}/add-text?{urlencode(params, quote_via=quote)}"
-        subprocess.Popen(["open", "-g", url])
+        _open_url_silently(url)
         res = await future
 
         note_text = unquote_plus(res.get("note") or "")
