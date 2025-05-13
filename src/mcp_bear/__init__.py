@@ -8,7 +8,7 @@
 import asyncio
 import json
 import logging
-import webbrowser
+import subprocess
 from asyncio import Queue, Future, QueueEmpty
 from contextlib import asynccontextmanager
 from copy import deepcopy
@@ -79,6 +79,7 @@ class AppContext:
     today_results: Queue[Future[QueryParams]]
     search_results: Queue[Future[QueryParams]]
     grab_url_results: Queue[Future[QueryParams]]
+    add_text_results: Queue[Future[QueryParams]]
 
 
 @asynccontextmanager
@@ -109,6 +110,7 @@ async def app_lifespan(_server: FastMCP, callback_host: str, callback_port: int)
             today_results=register_callback(callback, "today"),
             search_results=register_callback(callback, "search"),
             grab_url_results=register_callback(callback, "grab-url"),
+            add_text_results=register_callback(callback, "add-text"),
         )
     finally:
         LOGGER.info("Stopping callback server")
@@ -146,7 +148,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if title is not None:
             params["title"] = title
 
-        webbrowser.open(f"{BASE_URL}/open-note?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/open-note?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         return unquote_plus(res.get("note") or "")
@@ -181,7 +184,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if timestamp:
             params["timestamp"] = "yes"
 
-        webbrowser.open(f"{BASE_URL}/create?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/create?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         return res.get("identifier") or ""
@@ -190,7 +194,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
     async def tags(
         ctx: Context,
     ) -> list[str]:
-        """Return all the tags currently displayed in Bear’s sidebar."""
+        """Return all the tags currently displayed in Bear's sidebar."""
         app_ctx: AppContext = ctx.request_context.lifespan_context  # type: ignore
         future = Future[QueryParams]()
         await app_ctx.tags_results.put(future)
@@ -201,7 +205,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             "x-error": f"http://{callback_host}:{callback_port}/tags/error",
         }
 
-        webbrowser.open(f"{BASE_URL}/tags?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/tags?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("tags") or "[]"))
@@ -224,7 +229,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
             "x-error": f"http://{callback_host}:{callback_port}/open-tag/error",
         }
 
-        webbrowser.open(f"{BASE_URL}/open-tag?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/open-tag?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -249,7 +255,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if search is not None:
             params["search"] = search
 
-        webbrowser.open(f"{BASE_URL}/todo?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/todo?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -274,7 +281,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if search is not None:
             params["search"] = search
 
-        webbrowser.open(f"{BASE_URL}/today?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/today?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -302,7 +310,8 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if tag is not None:
             params["tag"] = tag
 
-        webbrowser.open(f"{BASE_URL}/search?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/search?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         notes = cast(list[dict], json.loads(res.get("notes") or "[]"))
@@ -313,7 +322,7 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         ctx: Context,
         url: str = Field(description="url to grab"),
         tags: list[str] | None = Field(
-            description="list of tags. If tags are specified in the Bear’s web content preferences, this parameter is ignored.",
+            description="list of tags. If tags are specified in the Bear's web content preferences, this parameter is ignored.",
             default=None,
         ),
     ) -> str:
@@ -330,10 +339,57 @@ def server(token: str, callback_host: str, callback_port: int) -> FastMCP:
         if tags is not None:
             params["tags"] = ",".join(tags)
 
-        webbrowser.open(f"{BASE_URL}/grab-url?{urlencode(params, quote_via=quote)}")
+        url = f"{BASE_URL}/grab-url?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
         res = await future
 
         return res.get("identifier") or ""
+
+    @mcp.tool()
+    async def add_text(
+        ctx: Context,
+        text: str | None = Field(default=None, description="text to add"),
+        id: str | None = Field(default=None, description="optional note unique identifier"),
+        title: str | None = Field(default=None, description="optional title of the note"),
+        header: str | None = Field(default=None, description="add the text to the corresponding header inside the note"),
+        mode: str | None = Field(default=None, description="allowed values are prepend, append, replace_all and replace"),
+        new_line: bool = Field(default=False, description="force the text to appear on a new line inside the note (only if mode is append)"),
+        tags: list[str] | None = Field(default=None, description="optional a comma separated list of tags"),
+        timestamp: bool = Field(default=False, description="prepend the current date and time to the text"),
+    ) -> tuple[str, str]:
+        """Append or prepend text to a note identified by its title or id. Encrypted notes can't be accessed with this call."""
+        app_ctx: AppContext = ctx.request_context.lifespan_context  # type: ignore
+        future = Future[QueryParams]()
+        await app_ctx.add_text_results.put(future)
+
+        params = {
+            "x-success": f"http://{callback_host}:{callback_port}/add-text/success",
+            "x-error": f"http://{callback_host}:{callback_port}/add-text/error",
+        }
+        if id is not None:
+            params["id"] = id
+        if title is not None:
+            params["title"] = title
+        if text is not None:
+            params["text"] = text
+        if header is not None:
+            params["header"] = header
+        if mode is not None:
+            params["mode"] = mode
+        if new_line and mode == "append":
+            params["new_line"] = "yes"
+        if tags is not None:
+            params["tags"] = ",".join(tags)
+        if timestamp:
+            params["timestamp"] = "yes"
+
+        url = f"{BASE_URL}/add-text?{urlencode(params, quote_via=quote)}"
+        subprocess.Popen(["open", url])
+        res = await future
+
+        note_text = unquote_plus(res.get("note") or "")
+        note_title = unquote_plus(res.get("title") or "")
+        return note_text, note_title
 
     return mcp
 
